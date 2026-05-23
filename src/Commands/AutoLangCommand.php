@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Vnuswilliams\LaravelAutoLang\Services\BladeScanner;
 use Vnuswilliams\LaravelAutoLang\Services\BladeTransformer;
-use Vnuswilliams\LaravelAutoLang\Services\JsonTranslationWriter;
+use Vnuswilliams\LaravelAutoLang\Services\TranslationWriter;
 use Vnuswilliams\LaravelAutoLang\Services\TextExtractor;
 
 class AutoLangCommand extends Command
@@ -16,7 +16,7 @@ class AutoLangCommand extends Command
      *
      * @var string
      */
-     protected $signature = 'lang:auto {--locale= : Locale to target for the JSON translation file (e.g. fr)} {--dry : Preview changes without writing files} {--force : Skip confirmation prompts}';
+     protected $signature = 'lang:auto {--locale= : Locale to target for translation file (e.g. fr)} {--output= : Output format: json or php} {--dry : Preview changes without writing files} {--force : Skip confirmation prompts}';
 
     /**
      * The console command description.
@@ -33,12 +33,19 @@ class AutoLangCommand extends Command
         BladeScanner $scanner,
         TextExtractor $extractor,
         BladeTransformer $transformer,
-        JsonTranslationWriter $writer
+        TranslationWriter $writer
     ): int {
         $paths = (array) config('lang-auto.paths', [resource_path('views')]);
-        $locale = (string) ($this->option('locale') ?: config('lang-auto.locale', 'en'));
+        $locale = (string) ($this->option('locale') ?: 'en');
         $dryRun = (bool) $this->option('dry');
         $force = (bool) $this->option('force');
+
+        $output = strtolower((string) ($this->option('output') ?: 'json'));
+        if (! in_array($output, ['json', 'php'], true)) {
+            $this->error('Invalid output format. Allowed values: json, php.');
+
+            return self::FAILURE;
+        }
 
         $bladeFiles = $scanner->scan($paths);
 
@@ -104,11 +111,23 @@ class AutoLangCommand extends Command
             $files->put($change['file'], $change['content']);
         }
 
-        $addedCount = $writer->append($locale, $allStrings);
+        $phpFile = null;
+        if ($output === 'php') {
+            $defaultPhpFile = (string) config('lang-auto.php_file', 'messages');
+            $phpFile = $force
+                ? $defaultPhpFile
+                : (string) $this->ask('Translation file name (without .php)', $defaultPhpFile);
+        }
+
+        $addedCount = $writer->append($locale, $allStrings, $output, $phpFile);
+
+        $target = $output === 'json'
+            ? "{$locale}.json"
+            : $locale.'/'.trim((string) preg_replace('/\.php$/i', '', (string) $phpFile)).'.php';
 
         $this->info('Done.');
         $this->line('Updated Blade files: '.count($changes));
-        $this->line("New translation entries added to {$locale}.json: {$addedCount}");
+        $this->line("New translation entries added to {$target}: {$addedCount}");
 
         return self::SUCCESS;
     }
