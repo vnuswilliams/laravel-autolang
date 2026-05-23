@@ -11,7 +11,7 @@ use Vnuswilliams\LaravelAutoLang\Services\TextExtractor;
 
 class AutoLangCommand extends Command
 {
-    protected $signature = 'lang:auto {--dry : Preview changes without writing files} {--force : Skip confirmation prompts}';
+    protected $signature = 'lang:auto {--locale= : Locale to target for the JSON translation file (e.g. fr)} {--dry : Preview changes without writing files} {--force : Skip confirmation prompts}';
 
     protected $description = 'Scan blade views, wrap hardcoded text with __(), and update JSON translations.';
 
@@ -23,7 +23,7 @@ class AutoLangCommand extends Command
         JsonTranslationWriter $writer
     ): int {
         $paths = (array) config('lang-auto.paths', [resource_path('views')]);
-        $locale = (string) config('lang-auto.locale', 'en');
+        $locale = (string) ($this->option('locale') ?: config('lang-auto.locale', 'en'));
         $dryRun = (bool) $this->option('dry');
         $force = (bool) $this->option('force');
 
