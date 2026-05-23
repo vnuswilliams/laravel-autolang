@@ -28,27 +28,44 @@ class AutoLangCommandTest extends TestCase
         $this->assertFileDoesNotExist(lang_path('en.json'));
     }
 
-    public function test_force_mode_updates_blade_and_json_file(): void
+    public function test_default_locale_and_output_are_used_when_options_missing(): void
     {
         $viewsPath = resource_path('views');
-        $langPath = lang_path();
-
         @mkdir($viewsPath, 0777, true);
-        @mkdir($langPath, 0777, true);
 
         $bladeFile = $viewsPath.'/home.blade.php';
-        file_put_contents($bladeFile, "<p>Bonjour</p>");
+        file_put_contents($bladeFile, "<p>Hello</p>");
 
-        $exit = Artisan::call('lang:auto', ['--force' => true, '--locale' => 'fr']);
-        $output = Artisan::output();
+        config()->set('lang-auto.locale', 'fr');
+        config()->set('lang-auto.output', 'php');
+
+        $exit = Artisan::call('lang:auto', ['--force' => true]);
 
         $this->assertSame(0, $exit);
-        $this->assertStringContainsString('Done.', $output);
-        $this->assertSame("<p>{{ __('Bonjour') }}</p>", file_get_contents($bladeFile));
+        $this->assertFileExists(lang_path('en.json'));
+        $this->assertFileDoesNotExist(lang_path('fr/messages.php'));
+    }
 
-        $json = json_decode((string) file_get_contents(lang_path('fr.json')), true);
-        $this->assertIsArray($json);
-        $this->assertArrayHasKey('Bonjour', $json);
-        $this->assertSame('Bonjour', $json['Bonjour']);
+    public function test_force_mode_updates_blade_and_php_file_with_camel_case_name_and_collision_key(): void
+    {
+        $viewsPath = resource_path('views');
+        @mkdir($viewsPath, 0777, true);
+        @mkdir(lang_path('fr'), 0777, true);
+
+        $bladeFile = $viewsPath.'/employees.blade.php';
+        file_put_contents($bladeFile, "<p>Create employee</p>");
+
+        config()->set('lang-auto.php_file', 'my-file 🚀 name');
+
+        file_put_contents(lang_path('fr/myFileName.php'), "<?php\n\nreturn [\n    'myFileName.create' => 'Create',\n];\n");
+
+        $exit = Artisan::call('lang:auto', ['--force' => true, '--locale' => 'fr', '--output' => 'php']);
+
+        $this->assertSame(0, $exit);
+        $phpTranslations = include lang_path('fr/myFileName.php');
+        $this->assertIsArray($phpTranslations);
+        $this->assertArrayHasKey('myFileName.create', $phpTranslations);
+        $this->assertArrayHasKey('myFileName.createemployee', $phpTranslations);
+        $this->assertSame('Create employee', $phpTranslations['myFileName.createemployee']);
     }
 }

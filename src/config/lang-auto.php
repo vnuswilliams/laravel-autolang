@@ -9,7 +9,17 @@ return [
     ],
 
     /**
-     * Locale used for the generated JSON translation file.
+     * Locale used for generated translation files.
      */
     'locale' => 'en',
+
+    /**
+     * Output format for translations: json or php.
+     */
+    'output' => 'json',
+
+    /**
+     * Default file name used when output = php.
+     */
+    'php_file' => 'messages',
 ];

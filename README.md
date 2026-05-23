@@ -4,7 +4,7 @@ Laravel AutoLang automatise l’internationalisation de vos vues Blade en :
 
 - détectant le texte "en dur" dans vos templates `*.blade.php`,
 - remplaçant ce texte par `{{ __('...') }}`,
-- ajoutant automatiquement les entrées manquantes dans `lang/<locale>.json`.
+- ajoutant automatiquement les entrées manquantes dans `lang/<locale>.json` ou `lang/<locale>/<fichier>.php`.
 
 L’objectif est de réduire le travail manuel lors de la mise en place (ou la maintenance) du multilingue dans un projet Laravel.
 
@@ -31,7 +31,7 @@ L’objectif est de réduire le travail manuel lors de la mise en place (ou la m
 - Scan de un ou plusieurs dossiers de vues Blade.
 - Détection des segments texte entre balises HTML.
 - Remplacement automatique vers `{{ __('Texte') }}`.
-- Génération / mise à jour de `lang/<locale>.json`.
+- Génération / mise à jour de traductions au format JSON ou PHP.
 - Déduplication des clés déjà existantes.
 - Mode aperçu (`--dry`) pour valider avant écriture.
 - Confirmation interactive (désactivable avec `--force`).
@@ -49,7 +49,7 @@ L’objectif est de réduire le travail manuel lors de la mise en place (ou la m
 ## Installation
 
 ```bash
-composer require vnuswilliams/laravel-autolang
+composer require --dev vnuswilliams/laravel-autolang
 ```
 
 ---
@@ -71,6 +71,8 @@ return [
     ],
 
     'locale' => 'en',
+    'output' => 'json',
+    'php_file' => 'messages',
 ];
 ```
 
@@ -108,13 +110,14 @@ php artisan lang:auto
 Options :
 
 - `--locale=fr` : surcharge ponctuelle de la locale de sortie.
+- `--output=json|php` : choisit le format de sortie (surcharge la config).
 - `--dry` : simule l’exécution sans modifier de fichiers.
 - `--force` : applique directement sans demander de confirmation.
 
 Signature complète :
 
 ```bash
-php artisan lang:auto {--locale=} {--dry} {--force}
+php artisan lang:auto {--locale=} {--output=} {--dry} {--force}
 ```
 
 ---
