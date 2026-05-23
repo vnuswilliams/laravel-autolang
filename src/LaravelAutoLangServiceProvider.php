@@ -7,11 +7,17 @@ use Vnuswilliams\LaravelAutoLang\Commands\AutoLangCommand;
 
 class LaravelAutoLangServiceProvider extends ServiceProvider
 {
+    /**
+     * Register package services.
+     */
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/config/lang-auto.php', 'lang-auto');
     }
 
+    /**
+     * Bootstrap package services.
+     */
     public function boot(): void
     {
         $this->publishes([

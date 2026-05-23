@@ -5,6 +5,8 @@ namespace Vnuswilliams\LaravelAutoLang\Services;
 class BladeTransformer
 {
     /**
+     * Wrap plain text segments in Blade translation helpers.
+     *
      * @param  array<int, string>  $strings
      */
     public function transform(string $content, array $strings): string

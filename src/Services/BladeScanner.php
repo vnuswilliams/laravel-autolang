@@ -6,11 +6,16 @@ use Illuminate\Filesystem\Filesystem;
 
 class BladeScanner
 {
+    /**
+     * Create a new scanner instance.
+     */
     public function __construct(private readonly Filesystem $files)
     {
     }
 
     /**
+     * Scan directories and collect Blade view files.
+     *
      * @param  array<int, string>  $paths
      * @return array<int, string>
      */

@@ -6,11 +6,16 @@ use Illuminate\Filesystem\Filesystem;
 
 class JsonTranslationWriter
 {
+    /**
+     * Create a new writer instance.
+     */
     public function __construct(private readonly Filesystem $files)
     {
     }
 
     /**
+     * Append missing strings to the JSON language file.
+     *
      * @param  array<int, string>  $strings
      */
     public function append(string $locale, array $strings): int

@@ -5,6 +5,8 @@ namespace Vnuswilliams\LaravelAutoLang\Services;
 class TextExtractor
 {
     /**
+     * Extract translatable text candidates from Blade content.
+     *
      * @return array<int, string>
      */
     public function extractTranslatableStrings(string $content): array
@@ -28,6 +30,9 @@ class TextExtractor
         return array_values(array_unique($strings));
     }
 
+    /**
+     * Remove blocks that should be ignored during extraction.
+     */
     private function maskIgnoredBlocks(string $content): string
     {
         $patterns = [
@@ -49,6 +54,9 @@ class TextExtractor
         return $content;
     }
 
+    /**
+     * Determine whether a candidate should be translated.
+     */
     private function isValidCandidate(string $text): bool
     {
         if ($text === '') {
