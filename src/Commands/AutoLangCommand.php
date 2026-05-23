@@ -11,10 +11,23 @@ use Vnuswilliams\LaravelAutoLang\Services\TextExtractor;
 
 class AutoLangCommand extends Command
 {
-    protected $signature = 'lang:auto {--locale= : Locale to target for the JSON translation file (e.g. fr)} {--dry : Preview changes without writing files} {--force : Skip confirmation prompts}';
+    /**
+     * The console command signature.
+     *
+     * @var string
+     */
+     protected $signature = 'lang:auto {--locale= : Locale to target for the JSON translation file (e.g. fr)} {--dry : Preview changes without writing files} {--force : Skip confirmation prompts}';
 
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
     protected $description = 'Scan blade views, wrap hardcoded text with __(), and update JSON translations.';
 
+    /**
+     * Execute the console command.
+     */
     public function handle(
         Filesystem $files,
         BladeScanner $scanner,
