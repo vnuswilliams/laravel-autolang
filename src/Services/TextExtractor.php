@@ -36,6 +36,7 @@ class TextExtractor
     private function maskIgnoredBlocks(string $content): string
     {
         $patterns = [
+            '/<\?php[\s\S]*?\?>/i',
             '/<script\b[^>]*>.*?<\/script>/is',
             '/<style\b[^>]*>.*?<\/style>/is',
             '/@php[\s\S]*?@endphp/',
