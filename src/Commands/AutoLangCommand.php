@@ -16,7 +16,7 @@ class AutoLangCommand extends Command
      *
      * @var string
      */
-     protected $signature = 'lang:auto {path? : Relative path from configured view root(s), without extension} {--all : Scan all files from configured view root(s)} {--locale= : Locale to target for translation file (e.g. fr)} {--output= : Output format: json or php} {--dry : Preview changes without writing files} {--force : Skip confirmation prompts}';
+    protected $signature = 'lang:auto {path? : Relative path from configured view root(s), without extension} {--all : Scan all files from configured view root(s)} {--locale= : Locale to target for translation file (e.g. fr)} {--output= : Output format: json or php} {--dry : Preview changes without writing files} {--force : Skip confirmation prompts}';
 
     /**
      * The console command description.
@@ -79,15 +79,9 @@ class AutoLangCommand extends Command
         $changes = [];
         $allStrings = [];
 
-        $phpFile = null;
-        if ($output === 'php') {
-            $defaultPhpFile = (string) config('lang-auto.php_file', 'messages');
-            $phpFile = $force
-                ? $defaultPhpFile
-                : (string) $this->ask('Translation file name (without .php)', $defaultPhpFile);
-        }
-
         foreach ($bladeFiles as $file) {
+            $phpFile = $output === 'php' ? $this->derivePhpFileName($file) : null;
+
             $original = $files->get($file);
             $allStrings = [...$allStrings, ...$extractor->extractTranslationKeys($original)];
             $strings = $extractor->extractTranslatableStrings($original);
@@ -102,7 +96,12 @@ class AutoLangCommand extends Command
                 continue;
             }
 
-            $changes[] = ['file' => $file, 'content' => $transformed, 'strings' => $strings];
+            $changes[] = [
+                'file'    => $file,
+                'content' => $transformed,
+                'strings' => $strings,
+                'phpFile' => $phpFile,
+            ];
             $allStrings = [...$allStrings, ...$strings];
         }
 
@@ -122,7 +121,11 @@ class AutoLangCommand extends Command
         $this->newLine();
         $this->info('Affected files:');
         foreach ($changes as $change) {
-            $this->line('- '.$change['file']);
+            $label = $change['file'];
+            if ($output === 'php') {
+                $label .= "  →  {$locale}/{$change['phpFile']}.php";
+            }
+            $this->line('- '.$label);
         }
 
         if ($dryRun) {
@@ -137,22 +140,46 @@ class AutoLangCommand extends Command
             return self::SUCCESS;
         }
 
-        if ($changes !== []) {
-            foreach ($changes as $change) {
-                $files->put($change['file'], $change['content']);
-            }
+        $addedCount = 0;
+
+        foreach ($changes as $change) {
+            $files->put($change['file'], $change['content']);
+            $addedCount += $writer->append($locale, $change['strings'], $output, $change['phpFile']);
         }
-
-        $addedCount = $writer->append($locale, $allStrings, $output, $phpFile);
-
-        $target = $output === 'json'
-            ? "{$locale}.json"
-            : $locale.'/'.trim((string) preg_replace('/\.php$/i', '', (string) $phpFile)).'.php';
 
         $this->info('Done.');
         $this->line('Updated Blade files: '.count($changes));
-        $this->line("Translation entries added to {$target}: {$addedCount}");
+        $this->line("Translation entries added: {$addedCount}");
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Derive the PHP translation file name from a Blade file path.
+     *
+     * Rules:
+     *  - Strip all extensions (e.g. .blade.php → strip twice)
+     *  - Lowercase
+     *  - Remove every character that is not a Unicode letter or digit
+     *
+     * Examples:
+     *  welcome.blade.php          → welcome
+     *  ⚡welcome-to.blade.php     → welcometo
+     *  My_Cool View.blade.php     → mycoolview
+     */
+    private function derivePhpFileName(string $filePath): string
+    {
+        $name = basename($filePath);
+
+        // Strip extensions iteratively (.blade.php needs two passes)
+        while (str_contains($name, '.')) {
+            $name = pathinfo($name, PATHINFO_FILENAME);
+        }
+
+        // Lowercase + remove everything that is not a letter or digit
+        $name = mb_strtolower($name, 'UTF-8');
+        $name = (string) preg_replace('/[^\p{L}\p{N}]/u', '', $name);
+
+        return $name !== '' ? $name : 'messages';
     }
 }
