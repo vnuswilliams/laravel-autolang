@@ -24,4 +24,18 @@ BLADE;
 
         $this->assertSame(['Bienvenue', 'Bonjour tout le monde'], $strings);
     }
+
+    public function test_it_extracts_prefixed_translation_keys_as_canonical_leaf_key(): void
+    {
+        $content = <<<'BLADE'
+<h1>{{ __('prefix.lacle') }}</h1>
+<p>{{ __('prefix.unautreprefix.lacle2') }}</p>
+BLADE;
+
+        $extractor = new TextExtractor();
+
+        $keys = $extractor->extractTranslationKeys($content);
+
+        $this->assertSame(['lacle', 'lacle2'], $keys);
+    }
 }

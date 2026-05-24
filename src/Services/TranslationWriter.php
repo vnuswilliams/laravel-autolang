@@ -46,8 +46,10 @@ class TranslationWriter
         $beforeCount = count($existing);
 
         foreach ($strings as $string) {
-            if (! array_key_exists($string, $existing)) {
-                $existing[$string] = $fallbackValues[$string] ?? $string;
+            $candidate = $this->canonicalTranslationKey($string);
+
+            if (! array_key_exists($candidate, $existing)) {
+                $existing[$candidate] = $fallbackValues[$candidate] ?? $fallbackValues[$string] ?? $candidate;
             }
         }
 
@@ -84,10 +86,10 @@ class TranslationWriter
         $beforeCount = count($existing);
 
         foreach ($strings as $string) {
-            $candidate = $this->translationKey($string);
+            $candidate = $this->translationKey($this->canonicalTranslationKey($string));
 
             if (! array_key_exists($candidate, $existing)) {
-                $existing[$candidate] = $fallbackValues[$string] ?? $string;
+                $existing[$candidate] = $fallbackValues[$candidate] ?? $fallbackValues[$string] ?? $this->canonicalTranslationKey($string);
             }
         }
 
@@ -137,6 +139,22 @@ class TranslationWriter
         $normalized = preg_replace('/[^\p{L}\p{N}]+/u', '', $normalized) ?? '';
 
         return $normalized !== '' ? $normalized : 'translation';
+    }
+
+    private function canonicalTranslationKey(string $key): string
+    {
+        $candidate = trim($key);
+        if ($candidate === '') {
+            return $candidate;
+        }
+
+        if (! str_contains($candidate, '.')) {
+            return $candidate;
+        }
+
+        $parts = array_values(array_filter(explode('.', $candidate), static fn (string $part): bool => $part !== ''));
+
+        return $parts === [] ? $candidate : (string) end($parts);
     }
 
     /** @param array<string, string> $values */

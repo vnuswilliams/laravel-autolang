@@ -41,7 +41,7 @@ class TextExtractor
 
         $keys = [];
         foreach ($matches[2] ?? [] as $key) {
-            $candidate = trim((string) $key);
+            $candidate = $this->normalizeTranslationKey((string) $key);
             if ($candidate === '') {
                 continue;
             }
@@ -95,5 +95,21 @@ class TextExtractor
         }
 
         return true;
+    }
+
+    private function normalizeTranslationKey(string $key): string
+    {
+        $candidate = trim($key);
+        if ($candidate === '') {
+            return '';
+        }
+
+        if (! str_contains($candidate, '.')) {
+            return $candidate;
+        }
+
+        $parts = array_values(array_filter(explode('.', $candidate), static fn (string $part): bool => $part !== ''));
+
+        return $parts === [] ? $candidate : (string) end($parts);
     }
 }
