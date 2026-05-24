@@ -9,6 +9,13 @@ return [
     ],
 
     /**
+     * Allowed view file extensions used during scanning.
+     */
+    'extensions' => [
+        '.blade.php',
+    ],
+
+    /**
      * Locale used for generated translation files.
      */
     'locale' => 'en',
