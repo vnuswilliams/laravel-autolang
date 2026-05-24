@@ -1,12 +1,12 @@
 # Laravel AutoLang
 
-Laravel AutoLang automatise l’internationalisation de vos vues Blade en :
+Laravel AutoLang automatise l'internationalisation de vos vues Blade en :
 
 - détectant le texte "en dur" dans vos templates `*.blade.php`,
 - remplaçant ce texte par `{{ __('...') }}`,
 - ajoutant automatiquement les entrées manquantes dans `lang/<locale>.json` ou `lang/<locale>/<fichier>.php`.
 
-L’objectif est de réduire le travail manuel lors de la mise en place (ou la maintenance) du multilingue dans un projet Laravel.
+L'objectif est de réduire le travail manuel lors de la mise en place (ou la maintenance) du multilingue dans un projet Laravel.
 
 ---
 
@@ -17,7 +17,7 @@ L’objectif est de réduire le travail manuel lors de la mise en place (ou la m
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Commande disponible](#commande-disponible)
-- [Exemples d’utilisation](#exemples-dutilisation)
+- [Exemples d'utilisation](#exemples-dutilisation)
 - [Cas de figure pris en charge](#cas-de-figure-pris-en-charge)
 - [Cas ignorés / limites connues](#cas-ignorés--limites-connues)
 - [Workflow recommandé en équipe](#workflow-recommandé-en-équipe)
@@ -32,6 +32,7 @@ L’objectif est de réduire le travail manuel lors de la mise en place (ou la m
 - Détection des segments texte entre balises HTML.
 - Remplacement automatique vers `{{ __('Texte') }}`.
 - Génération / mise à jour de traductions au format JSON ou PHP.
+- Nommage automatique du fichier PHP de traduction d'après le fichier Blade scanné.
 - Déduplication des clés déjà existantes.
 - Mode aperçu (`--dry`) pour valider avant écriture.
 - Confirmation interactive (désactivable avec `--force`).
@@ -42,7 +43,7 @@ L’objectif est de réduire le travail manuel lors de la mise en place (ou la m
 
 - PHP compatible avec votre version Laravel.
 - Un projet Laravel avec arborescence standard (`resources/views`, `lang`, etc.).
-- Droits d’écriture sur les fichiers de vues et le dossier de langues.
+- Droits d'écriture sur les fichiers de vues et le dossier de langues.
 
 ---
 
@@ -76,7 +77,6 @@ return [
 
     'locale' => 'en',
     'output' => 'json',
-    'php_file' => 'messages',
 ];
 ```
 
@@ -103,17 +103,39 @@ Par défaut :
 'extensions' => ['.blade.php'],
 ```
 
-Vous pourrez ajouter plus tard des extensions comme `.jsx` ou `.tsx` selon l’évolution du projet.
-
 ### `locale`
 
-Locale cible pour le fichier JSON de traduction (`lang/<locale>.json`).
-
-Exemple :
+Locale cible pour le fichier de traduction.
 
 ```php
 'locale' => 'fr',
 ```
+
+### `output`
+
+Format de sortie : `json` (défaut) ou `php`.
+
+Lorsque `output = php`, le nom du fichier PHP est **dérivé automatiquement** du fichier Blade scanné — aucune configuration supplémentaire n'est nécessaire.
+
+---
+
+## Nommage automatique des fichiers PHP
+
+Quand `output = php`, le fichier de traduction prend le nom du fichier Blade, normalisé selon ces règles :
+
+| Fichier Blade | Fichier de traduction |
+|---|---|
+| `welcome.blade.php` | `lang/<locale>/welcome.php` |
+| `leave-balance.blade.php` | `lang/<locale>/leavebalance.php` |
+| `⚡welcome-to.blade.php` | `lang/<locale>/welcometo.php` |
+| `My_Cool View.blade.php` | `lang/<locale>/mycoolview.php` |
+
+**Règles appliquées :**
+1. Les extensions sont supprimées (`.blade.php` → deux passes).
+2. Le résultat est mis en minuscules.
+3. Tout caractère qui n'est pas une lettre Unicode ou un chiffre est retiré.
+
+Avec `--all`, chaque fichier Blade produit son propre fichier PHP de traduction.
 
 ---
 
@@ -125,7 +147,7 @@ php artisan lang:auto {path?}
 
 - `path` (optionnel) : chemin **relatif** depuis `resources/views` (ou le dossier racine défini dans la config), sans extension.
 - Si `path` est absent, la commande le demande de façon interactive.
-- Si l’utilisateur saisit un chemin commençant par `/`, le slash initial est retiré automatiquement.
+- Si l'utilisateur saisit un chemin commençant par `/`, le slash initial est retiré automatiquement.
 
 Exemples de chemins :
 
@@ -137,7 +159,7 @@ Options :
 - `--all` : scanne **tout** le dossier configuré (et sous-dossiers). Drapeau sans valeur.
 - `--locale=fr` : surcharge ponctuelle de la locale de sortie.
 - `--output=json|php` : choisit le format de sortie (surcharge la config).
-- `--dry` : simule l’exécution sans modifier de fichiers.
+- `--dry` : simule l'exécution sans modifier de fichiers.
 - `--force` : applique directement sans demander de confirmation.
 
 Avec `--all`, une confirmation supplémentaire est demandée avant de lancer le scan global (sauf si `--force` est présent).
@@ -150,9 +172,9 @@ php artisan lang:auto {path?} {--all} {--locale=} {--output=} {--dry} {--force}
 
 ---
 
-## Exemples d’utilisation
+## Exemples d'utilisation
 
-### 1) Première migration vers les traductions
+### 1) Première migration vers les traductions (JSON)
 
 ```bash
 php artisan lang:auto --locale=fr
@@ -162,37 +184,44 @@ php artisan lang:auto --locale=fr
 - Il affiche les chaînes détectées + les fichiers impactés.
 - Après confirmation, il modifie les vues et met à jour `lang/fr.json`.
 
-### 2) Vérification avant commit (CI locale)
+### 2) Sortie PHP — nommage automatique
+
+```bash
+php artisan lang:auto leave-balance --locale=fr --output=php --force
+```
+
+- Scanne `resources/views/leave-balance.blade.php`.
+- Crée/alimente `lang/fr/leavebalance.php` automatiquement.
+
+### 3) Scan global en PHP
+
+```bash
+php artisan lang:auto --all --locale=fr --output=php --force
+```
+
+- Scanne toutes les vues.
+- Chaque vue produit son propre fichier PHP :
+  - `welcome.blade.php` → `lang/fr/welcome.php`
+  - `hr/leave-balance.blade.php` → `lang/fr/leavebalance.php`
+
+### 4) Vérification avant commit (CI locale)
 
 ```bash
 php artisan lang:auto --dry
 ```
 
 - Aucun fichier modifié.
-- Permet de voir ce qui serait changé avant d’appliquer.
+- Permet de voir ce qui serait changé avant d'appliquer.
 
-### 3) Exécution non interactive (script / CI)
+### 5) Exécution non interactive (script / CI)
 
 ```bash
 php artisan lang:auto --force
 ```
 
-- Pas de prompt de confirmation.
-- Utile dans un script automatisé.
-
-### 4) Locale ponctuelle sans toucher la config
-
-```bash
-php artisan lang:auto --locale=de --force
-```
-
-- Crée/alimente `lang/de.json` même si `config('lang-auto.locale')` est différent.
-
 ---
 
 ## Cas de figure pris en charge
-
-Voici les cas typiques gérés automatiquement.
 
 ### Texte HTML simple
 
@@ -238,14 +267,14 @@ Après :
 
 ### Déduplication des entrées JSON
 
-Si une clé existe déjà dans `lang/<locale>.json`, elle n’est pas dupliquée.
+Si une clé existe déjà dans `lang/<locale>.json`, elle n'est pas dupliquée.
 Le fichier est trié alphabétiquement pour garder un diff propre.
 
 ---
 
 ## Cas ignorés / limites connues
 
-Pour éviter les faux positifs, certains blocs sont ignorés pendant l’extraction :
+Pour éviter les faux positifs, certains blocs sont ignorés pendant l'extraction :
 
 - `<script>...</script>`
 - `<style>...</style>`
@@ -281,7 +310,7 @@ Pour éviter les faux positifs, certains blocs sont ignorés pendant l’extract
 
 4. Relire les diffs sur :
    - vues Blade modifiées,
-   - fichier `lang/<locale>.json`.
+   - fichiers `lang/<locale>/*.php` ou `lang/<locale>.json`.
 5. Faire un commit clair (ex: `chore(i18n): auto-wrap blade strings`).
 
 ---
@@ -298,9 +327,9 @@ Pour éviter les faux positifs, certains blocs sont ignorés pendant l’extract
 - Les chaînes sont peut-être déjà traduites.
 - Le contenu peut être dans un bloc ignoré (`script`, `style`, composants, Blade dynamique).
 
-### Le fichier `lang/<locale>.json` n’est pas créé
+### Le fichier de traduction PHP n'est pas créé
 
-- Vérifiez les permissions d’écriture dans le dossier `lang/`.
+- Vérifiez les permissions d'écriture dans le dossier `lang/`.
 - Vérifiez la locale utilisée (`--locale` ou config).
 
 ---
