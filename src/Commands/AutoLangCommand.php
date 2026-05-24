@@ -79,6 +79,14 @@ class AutoLangCommand extends Command
         $changes = [];
         $allStrings = [];
 
+        $phpFile = null;
+        if ($output === 'php') {
+            $defaultPhpFile = (string) config('lang-auto.php_file', 'messages');
+            $phpFile = $force
+                ? $defaultPhpFile
+                : (string) $this->ask('Translation file name (without .php)', $defaultPhpFile);
+        }
+
         foreach ($bladeFiles as $file) {
             $original = $files->get($file);
             $allStrings = [...$allStrings, ...$extractor->extractTranslationKeys($original)];
@@ -88,7 +96,7 @@ class AutoLangCommand extends Command
                 continue;
             }
 
-            $transformed = $transformer->transform($original, $strings);
+            $transformed = $transformer->transform($original, $strings, $phpFile, $output);
 
             if ($transformed === $original) {
                 continue;
@@ -133,14 +141,6 @@ class AutoLangCommand extends Command
             foreach ($changes as $change) {
                 $files->put($change['file'], $change['content']);
             }
-        }
-
-        $phpFile = null;
-        if ($output === 'php') {
-            $defaultPhpFile = (string) config('lang-auto.php_file', 'messages');
-            $phpFile = $force
-                ? $defaultPhpFile
-                : (string) $this->ask('Translation file name (without .php)', $defaultPhpFile);
         }
 
         $addedCount = $writer->append($locale, $allStrings, $output, $phpFile);

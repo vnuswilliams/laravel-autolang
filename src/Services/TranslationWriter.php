@@ -82,15 +82,9 @@ class TranslationWriter
         }
 
         $beforeCount = count($existing);
-        $prefix = $fileName.'.';
 
         foreach ($strings as $string) {
-            $baseKey = $this->basePhpKey($string);
-            $candidate = $prefix.$baseKey;
-
-            if (array_key_exists($candidate, $existing)) {
-                $candidate = $prefix.$this->fallbackPhpKey($string);
-            }
+            $candidate = $this->translationKey($string);
 
             if (! array_key_exists($candidate, $existing)) {
                 $existing[$candidate] = $fallbackValues[$string] ?? $string;
@@ -98,9 +92,7 @@ class TranslationWriter
         }
 
         ksort($existing);
-
-        $export = var_export($existing, true);
-        $content = "<?php\n\nreturn {$export};\n";
+        $content = $this->buildPhpArrayFile($existing);
         $this->files->put($path, $content);
 
         return count($existing) - $beforeCount;
@@ -139,15 +131,26 @@ class TranslationWriter
         return $camel !== '' ? $camel : 'messages';
     }
 
-    private function basePhpKey(string $value): string
+    private function translationKey(string $value): string
     {
-        $words = preg_split('/\s+/', trim($value)) ?: [];
+        $normalized = mb_strtolower($value, 'UTF-8');
+        $normalized = preg_replace('/[^\p{L}\p{N}]+/u', '', $normalized) ?? '';
 
-        return strtolower($words[0] ?? 'translation');
+        return $normalized !== '' ? $normalized : 'translation';
     }
 
-    private function fallbackPhpKey(string $value): string
+    /** @param array<string, string> $values */
+    private function buildPhpArrayFile(array $values): string
     {
-        return strtolower((string) preg_replace('/\s+/', '', trim($value)));
+        $lines = ["<?php", '', 'return ['];
+        foreach ($values as $key => $value) {
+            $escapedKey = addcslashes($key, "\\\"");
+            $escapedValue = addcslashes($value, "\\\"");
+            $lines[] = '    "'.$escapedKey.'" => "'.$escapedValue.'",';
+        }
+        $lines[] = '];';
+        $lines[] = '';
+
+        return implode(PHP_EOL, $lines);
     }
 }

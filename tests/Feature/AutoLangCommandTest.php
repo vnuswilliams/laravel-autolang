@@ -57,16 +57,16 @@ class AutoLangCommandTest extends TestCase
 
         config()->set('lang-auto.php_file', 'my-file 🚀 name');
 
-        file_put_contents(lang_path('fr/myFileName.php'), "<?php\n\nreturn [\n    'myFileName.create' => 'Create',\n];\n");
+        file_put_contents(lang_path('fr/myFileName.php'), "<?php\n\nreturn [\n    \"create\" => \"Create\",\n];\n");
 
         $exit = Artisan::call('lang:auto', ['path' => 'employees', '--force' => true, '--locale' => 'fr', '--output' => 'php']);
 
         $this->assertSame(0, $exit);
         $phpTranslations = include lang_path('fr/myFileName.php');
         $this->assertIsArray($phpTranslations);
-        $this->assertArrayHasKey('myFileName.create', $phpTranslations);
-        $this->assertArrayHasKey('myFileName.createemployee', $phpTranslations);
-        $this->assertSame('Create employee', $phpTranslations['myFileName.createemployee']);
+        $this->assertArrayHasKey('create', $phpTranslations);
+        $this->assertArrayHasKey('createemployee', $phpTranslations);
+        $this->assertSame('Create employee', $phpTranslations['createemployee']);
     }
 
     public function test_relative_path_works_for_nested_view_without_extension(): void

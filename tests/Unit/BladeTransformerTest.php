@@ -14,7 +14,7 @@ class BladeTransformerTest extends TestCase
         $transformer = new BladeTransformer();
         $result = $transformer->transform($content, ['Bienvenue', "C'est prêt"]);
 
-        $this->assertStringContainsString("<h1>{{ __('Bienvenue') }}</h1>", $result);
-        $this->assertStringContainsString("<p> {{ __('C\\'est prêt') }} </p>", $result);
+        $this->assertStringContainsString('<h1>{{ __("bienvenue") }}</h1>', $result);
+        $this->assertStringContainsString('<p> {{ __("cestprêt") }} </p>', $result);
     }
 }
