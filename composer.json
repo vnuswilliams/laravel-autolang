@@ -13,13 +13,13 @@
     "homepage": "https://github.com/vnuswilliams/laravel-autolang",
      "require": {
     "php" : "^8.2",
-        "illuminate/support": "^10.0||^11.0||12.0||^13.11",
-        "illuminate/console": "^10.0||^11.0||12.0||^13.11",
-        "illuminate/filesystem": "^10.0||^11.0||12.0||^13.11"
+        "illuminate/support": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+        "illuminate/console": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+        "illuminate/filesystem": "^10.0 || ^11.0 || 12.0 || ^13.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^10.0||^11.0||12.0||^13.1",
-        "orchestra/testbench": "^10.0||^11.1"
+        "phpunit/phpunit": "^10.0 || ^11.0 || ^12.0 || ^13.1",
+        "orchestra/testbench": "^10.0 || ^11.1"
     },
     "autoload": {
         "psr-4": {
