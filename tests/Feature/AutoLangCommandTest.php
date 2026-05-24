@@ -42,31 +42,47 @@ class AutoLangCommandTest extends TestCase
         $exit = Artisan::call('lang:auto', ['path' => 'home', '--force' => true]);
 
         $this->assertSame(0, $exit);
-        $this->assertFileExists(lang_path('fr/messages.php'));
+        // PHP file name is derived from the blade file: home.blade.php → home.php
+        $this->assertFileExists(lang_path('fr/home.php'));
         $this->assertFileDoesNotExist(lang_path('en.json'));
     }
 
-    public function test_force_mode_updates_blade_and_php_file_with_camel_case_name_and_collision_key(): void
+    public function test_php_file_name_is_derived_from_blade_file_name(): void
     {
         $viewsPath = resource_path('views');
         @mkdir($viewsPath, 0777, true);
-        @mkdir(lang_path('fr'), 0777, true);
 
         $bladeFile = $viewsPath.'/employees.blade.php';
         file_put_contents($bladeFile, "<p>Create employee</p>");
 
-        config()->set('lang-auto.php_file', 'my-file 🚀 name');
-
-        file_put_contents(lang_path('fr/myFileName.php'), "<?php\n\nreturn [\n    \"create\" => \"Create\",\n];\n");
+        @mkdir(lang_path('fr'), 0777, true);
 
         $exit = Artisan::call('lang:auto', ['path' => 'employees', '--force' => true, '--locale' => 'fr', '--output' => 'php']);
 
         $this->assertSame(0, $exit);
-        $phpTranslations = include lang_path('fr/myFileName.php');
+        // employees.blade.php → fr/employees.php
+        $phpTranslations = include lang_path('fr/employees.php');
         $this->assertIsArray($phpTranslations);
-        $this->assertArrayHasKey('create', $phpTranslations);
         $this->assertArrayHasKey('createemployee', $phpTranslations);
         $this->assertSame('Create employee', $phpTranslations['createemployee']);
+    }
+
+    public function test_php_file_name_strips_special_chars_and_lowercases(): void
+    {
+        $viewsPath = resource_path('views');
+        // Simulate a file with dashes and uppercase (filesystem name is ASCII-safe)
+        @mkdir($viewsPath.'/hr', 0777, true);
+
+        $bladeFile = $viewsPath.'/hr/leave-balance.blade.php';
+        file_put_contents($bladeFile, "<p>Leave balance</p>");
+
+        @mkdir(lang_path('fr'), 0777, true);
+
+        $exit = Artisan::call('lang:auto', ['path' => 'hr/leave-balance', '--force' => true, '--locale' => 'fr', '--output' => 'php']);
+
+        $this->assertSame(0, $exit);
+        // leave-balance.blade.php → leave-balance (strip exts) → leavebalance (strip dash, lowercase)
+        $this->assertFileExists(lang_path('fr/leavebalance.php'));
     }
 
     public function test_relative_path_works_for_nested_view_without_extension(): void
@@ -100,6 +116,22 @@ class AutoLangCommandTest extends TestCase
         $this->assertStringContainsString('two.blade.php', $output);
     }
 
+    public function test_all_option_writes_one_php_file_per_blade_file(): void
+    {
+        $viewsPath = resource_path('views');
+        @mkdir($viewsPath.'/pages', 0777, true);
+        @mkdir(lang_path('fr'), 0777, true);
+
+        file_put_contents($viewsPath.'/invoice.blade.php', "<p>Invoice total</p>");
+        file_put_contents($viewsPath.'/pages/dashboard.blade.php', "<p>Dashboard title</p>");
+
+        $exit = Artisan::call('lang:auto', ['--all' => true, '--force' => true, '--locale' => 'fr', '--output' => 'php']);
+
+        $this->assertSame(0, $exit);
+        $this->assertFileExists(lang_path('fr/invoice.php'));
+        $this->assertFileExists(lang_path('fr/dashboard.php'));
+    }
+
     public function test_rerun_does_not_duplicate_prefixed_php_keys(): void
     {
         $viewsPath = resource_path('views');
@@ -107,12 +139,14 @@ class AutoLangCommandTest extends TestCase
         @mkdir(lang_path('fr'), 0777, true);
 
         $bladeFile = $viewsPath.'/prefixed.blade.php';
-        file_put_contents($bladeFile, '<p>{{ __("messages.lacle") }}</p>');
+        file_put_contents($bladeFile, '<p>{{ __("prefixed.lacle") }}</p>');
 
         $exit = Artisan::call('lang:auto', ['path' => 'prefixed', '--force' => true, '--locale' => 'fr', '--output' => 'php']);
 
         $this->assertSame(0, $exit);
-        $phpTranslations = include lang_path('fr/messages.php');
+        // prefixed.blade.php → fr/prefixed.php
+        $phpTranslations = include lang_path('fr/prefixed.php');
+        $this->assertIsArray($phpTranslations);
         $this->assertSame(['lacle' => 'lacle'], $phpTranslations);
     }
 
