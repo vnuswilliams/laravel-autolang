@@ -18,7 +18,7 @@ class AutoLangCommandTest extends TestCase
         $bladeFile = $viewsPath.'/welcome.blade.php';
         file_put_contents($bladeFile, "<h1>Welcome</h1>");
 
-        $exit = Artisan::call('lang:auto', ['--dry' => true, '--force' => true]);
+        $exit = Artisan::call('lang:auto', ['path' => 'welcome', '--dry' => true, '--force' => true]);
         $output = Artisan::output();
 
         $this->assertSame(0, $exit);
@@ -39,11 +39,11 @@ class AutoLangCommandTest extends TestCase
         config()->set('lang-auto.locale', 'fr');
         config()->set('lang-auto.output', 'php');
 
-        $exit = Artisan::call('lang:auto', ['--force' => true]);
+        $exit = Artisan::call('lang:auto', ['path' => 'home', '--force' => true]);
 
         $this->assertSame(0, $exit);
-        $this->assertFileExists(lang_path('en.json'));
-        $this->assertFileDoesNotExist(lang_path('fr/messages.php'));
+        $this->assertFileExists(lang_path('fr/messages.php'));
+        $this->assertFileDoesNotExist(lang_path('en.json'));
     }
 
     public function test_force_mode_updates_blade_and_php_file_with_camel_case_name_and_collision_key(): void
@@ -59,7 +59,7 @@ class AutoLangCommandTest extends TestCase
 
         file_put_contents(lang_path('fr/myFileName.php'), "<?php\n\nreturn [\n    'myFileName.create' => 'Create',\n];\n");
 
-        $exit = Artisan::call('lang:auto', ['--force' => true, '--locale' => 'fr', '--output' => 'php']);
+        $exit = Artisan::call('lang:auto', ['path' => 'employees', '--force' => true, '--locale' => 'fr', '--output' => 'php']);
 
         $this->assertSame(0, $exit);
         $phpTranslations = include lang_path('fr/myFileName.php');
@@ -67,5 +67,36 @@ class AutoLangCommandTest extends TestCase
         $this->assertArrayHasKey('myFileName.create', $phpTranslations);
         $this->assertArrayHasKey('myFileName.createemployee', $phpTranslations);
         $this->assertSame('Create employee', $phpTranslations['myFileName.createemployee']);
+    }
+
+    public function test_relative_path_works_for_nested_view_without_extension(): void
+    {
+        $viewsPath = resource_path('views/pages');
+        @mkdir($viewsPath, 0777, true);
+
+        $bladeFile = $viewsPath.'/welcome.blade.php';
+        file_put_contents($bladeFile, "<h2>Hello page</h2>");
+
+        $exit = Artisan::call('lang:auto', ['path' => 'pages/welcome', '--dry' => true, '--force' => true]);
+        $output = Artisan::output();
+
+        $this->assertSame(0, $exit);
+        $this->assertStringContainsString($bladeFile, $output);
+    }
+
+    public function test_all_option_scans_everything(): void
+    {
+        $viewsPath = resource_path('views');
+        @mkdir($viewsPath.'/pages', 0777, true);
+
+        file_put_contents($viewsPath.'/one.blade.php', "<p>One</p>");
+        file_put_contents($viewsPath.'/pages/two.blade.php', "<p>Two</p>");
+
+        $exit = Artisan::call('lang:auto', ['--all' => true, '--dry' => true, '--force' => true]);
+        $output = Artisan::output();
+
+        $this->assertSame(0, $exit);
+        $this->assertStringContainsString('one.blade.php', $output);
+        $this->assertStringContainsString('two.blade.php', $output);
     }
 }

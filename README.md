@@ -70,6 +70,10 @@ return [
         resource_path('views'),
     ],
 
+    'extensions' => [
+        '.blade.php',
+    ],
+
     'locale' => 'en',
     'output' => 'json',
     'php_file' => 'messages',
@@ -89,6 +93,18 @@ Exemple avec plusieurs emplacements :
 ],
 ```
 
+### `extensions`
+
+Liste des extensions de fichiers autorisées pendant le scan.
+
+Par défaut :
+
+```php
+'extensions' => ['.blade.php'],
+```
+
+Vous pourrez ajouter plus tard des extensions comme `.jsx` ou `.tsx` selon l’évolution du projet.
+
 ### `locale`
 
 Locale cible pour le fichier JSON de traduction (`lang/<locale>.json`).
@@ -104,20 +120,32 @@ Exemple :
 ## Commande disponible
 
 ```bash
-php artisan lang:auto
+php artisan lang:auto {path?}
 ```
+
+- `path` (optionnel) : chemin **relatif** depuis `resources/views` (ou le dossier racine défini dans la config), sans extension.
+- Si `path` est absent, la commande le demande de façon interactive.
+- Si l’utilisateur saisit un chemin commençant par `/`, le slash initial est retiré automatiquement.
+
+Exemples de chemins :
+
+- `welcome` ⟶ cherche `resources/views/welcome.blade.php`
+- `pages/welcome` ⟶ cherche `resources/views/pages/welcome.blade.php`
 
 Options :
 
+- `--all` : scanne **tout** le dossier configuré (et sous-dossiers). Drapeau sans valeur.
 - `--locale=fr` : surcharge ponctuelle de la locale de sortie.
 - `--output=json|php` : choisit le format de sortie (surcharge la config).
 - `--dry` : simule l’exécution sans modifier de fichiers.
 - `--force` : applique directement sans demander de confirmation.
 
+Avec `--all`, une confirmation supplémentaire est demandée avant de lancer le scan global (sauf si `--force` est présent).
+
 Signature complète :
 
 ```bash
-php artisan lang:auto {--locale=} {--output=} {--dry} {--force}
+php artisan lang:auto {path?} {--all} {--locale=} {--output=} {--dry} {--force}
 ```
 
 ---

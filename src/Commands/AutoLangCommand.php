@@ -16,7 +16,7 @@ class AutoLangCommand extends Command
      *
      * @var string
      */
-     protected $signature = 'lang:auto {--locale= : Locale to target for translation file (e.g. fr)} {--output= : Output format: json or php} {--dry : Preview changes without writing files} {--force : Skip confirmation prompts}';
+     protected $signature = 'lang:auto {path? : Relative path from configured view root(s), without extension} {--all : Scan all files from configured view root(s)} {--locale= : Locale to target for translation file (e.g. fr)} {--output= : Output format: json or php} {--dry : Preview changes without writing files} {--force : Skip confirmation prompts}';
 
     /**
      * The console command description.
@@ -36,21 +36,42 @@ class AutoLangCommand extends Command
         TranslationWriter $writer
     ): int {
         $paths = (array) config('lang-auto.paths', [resource_path('views')]);
-        $locale = (string) ($this->option('locale') ?: 'en');
+        $extensions = (array) config('lang-auto.extensions', ['.blade.php']);
+        $locale = (string) ($this->option('locale') ?: config('lang-auto.locale', 'en'));
         $dryRun = (bool) $this->option('dry');
         $force = (bool) $this->option('force');
+        $scanAll = (bool) $this->option('all');
 
-        $output = strtolower((string) ($this->option('output') ?: 'json'));
+        $output = strtolower((string) ($this->option('output') ?: config('lang-auto.output', 'json')));
         if (! in_array($output, ['json', 'php'], true)) {
             $this->error('Invalid output format. Allowed values: json, php.');
 
             return self::FAILURE;
         }
 
-        $bladeFiles = $scanner->scan($paths);
+        $inputPath = (string) ($this->argument('path') ?? '');
+        $inputPath = ltrim(trim($inputPath), '/\\');
+
+        if (! $scanAll && $inputPath === '') {
+            $inputPath = ltrim((string) $this->ask('Enter the relative file path from resources/views (without leading slash and without extension)'), '/\\');
+        }
+
+        if ($scanAll && ! $force) {
+            $this->warn('You are about to scan every matching view file in the configured directories, including subdirectories.');
+
+            if (! $this->confirm('Continue with --all scan?', false)) {
+                $this->warn('Operation cancelled.');
+
+                return self::SUCCESS;
+            }
+        }
+
+        $bladeFiles = $scanAll
+            ? $scanner->scanAll($paths, $extensions)
+            : array_values(array_filter([(string) $scanner->findByRelativePath($inputPath, $paths, $extensions)]));
 
         if ($bladeFiles === []) {
-            $this->warn('No Blade files found.');
+            $this->warn($scanAll ? 'No matching view files found.' : 'View file not found for the provided path.');
 
             return self::SUCCESS;
         }
