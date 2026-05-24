@@ -1,6 +1,6 @@
 <?php
 
-namespace Vnuswilliams\LaravelAutoLang\Services;
+namespace VnusWilliams\LaravelAutoLang\Services;
 
 class BladeTransformer
 {

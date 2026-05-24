@@ -1,9 +1,9 @@
 <?php
 
-namespace Vnuswilliams\LaravelAutoLang\Tests;
+namespace VnusWilliams\LaravelAutoLang\Tests;
 
 use Orchestra\Testbench\TestCase as Orchestra;
-use Vnuswilliams\LaravelAutoLang\LaravelAutoLangServiceProvider;
+use VnusWilliams\LaravelAutoLang\LaravelAutoLangServiceProvider;
 
 abstract class TestCase extends Orchestra
 {

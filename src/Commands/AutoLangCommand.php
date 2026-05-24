@@ -1,13 +1,13 @@
 <?php
 
-namespace Vnuswilliams\LaravelAutoLang\Commands;
+namespace VnusWilliams\LaravelAutoLang\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use Vnuswilliams\LaravelAutoLang\Services\BladeScanner;
-use Vnuswilliams\LaravelAutoLang\Services\BladeTransformer;
-use Vnuswilliams\LaravelAutoLang\Services\TranslationWriter;
-use Vnuswilliams\LaravelAutoLang\Services\TextExtractor;
+use VnusWilliams\LaravelAutoLang\Services\BladeScanner;
+use VnusWilliams\LaravelAutoLang\Services\BladeTransformer;
+use VnusWilliams\LaravelAutoLang\Services\TranslationWriter;
+use VnusWilliams\LaravelAutoLang\Services\TextExtractor;
 
 class AutoLangCommand extends Command
 {

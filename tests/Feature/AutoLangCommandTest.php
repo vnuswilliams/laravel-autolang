@@ -1,9 +1,9 @@
 <?php
 
-namespace Vnuswilliams\LaravelAutoLang\Tests\Feature;
+namespace VnusWilliams\LaravelAutoLang\Tests\Feature;
 
 use Illuminate\Support\Facades\Artisan;
-use Vnuswilliams\LaravelAutoLang\Tests\TestCase;
+use VnusWilliams\LaravelAutoLang\Tests\TestCase;
 
 class AutoLangCommandTest extends TestCase
 {

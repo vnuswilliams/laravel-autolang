@@ -1,9 +1,9 @@
 <?php
 
-namespace Vnuswilliams\LaravelAutoLang\Tests\Unit;
+namespace VnusWilliams\LaravelAutoLang\Tests\Unit;
 
-use Vnuswilliams\LaravelAutoLang\Services\BladeTransformer;
-use Vnuswilliams\LaravelAutoLang\Tests\TestCase;
+use VnusWilliams\LaravelAutoLang\Services\BladeTransformer;
+use VnusWilliams\LaravelAutoLang\Tests\TestCase;
 
 class BladeTransformerTest extends TestCase
 {

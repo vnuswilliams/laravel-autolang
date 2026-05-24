@@ -59,7 +59,7 @@ composer require --dev vnuswilliams/laravel-autolang
 Publiez le fichier de configuration :
 
 ```bash
-php artisan vendor:publish --provider="Vnuswilliams\\LaravelAutoLang\\LaravelAutoLangServiceProvider" --tag=config
+php artisan vendor:publish --provider="VnusWilliams\\LaravelAutoLang\\LaravelAutoLangServiceProvider" --tag=config
 ```
 
 Le fichier `config/lang-auto.php` expose :

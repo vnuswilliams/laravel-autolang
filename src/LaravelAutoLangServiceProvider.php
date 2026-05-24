@@ -1,9 +1,9 @@
 <?php
 
-namespace Vnuswilliams\LaravelAutoLang;
+namespace VnusWilliams\LaravelAutoLang;
 
 use Illuminate\Support\ServiceProvider;
-use Vnuswilliams\LaravelAutoLang\Commands\AutoLangCommand;
+use VnusWilliams\LaravelAutoLang\Commands\AutoLangCommand;
 
 class LaravelAutoLangServiceProvider extends ServiceProvider
 {

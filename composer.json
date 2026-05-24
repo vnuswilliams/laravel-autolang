@@ -1,35 +1,51 @@
 {
-  "name": "vnuswilliams/laravel-autolang",
-  "description": "Laravel package that scans Blade files, extracts hardcoded UI text, wraps it with __(), and generates JSON translation files automatically.",
-  "type": "library",
-  "license": "MIT",
-  "autoload": {
-    "psr-4": {
-      "Vnuswilliams\\LaravelAutoLang\\": "src/"
-    }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Vnuswilliams\\LaravelAutoLang\\Tests\\": "tests/"
-    }
-  },
-  "require": {
-    "php": "^8.1",
-    "illuminate/support": "^10.0|^11.0|^12.0",
-    "illuminate/console": "^10.0|^11.0|^12.0",
-    "illuminate/filesystem": "^10.0|^11.0|^12.0"
-  },
-  "require-dev": {
-    "orchestra/testbench": "^8.0|^9.0|^10.0",
-    "phpunit/phpunit": "^10.0|^11.0"
-  },
-  "extra": {
-    "laravel": {
-      "providers": [
-        "Vnuswilliams\\LaravelAutoLang\\LaravelAutoLangServiceProvider"
-      ]
-    }
-  },
-  "minimum-stability": "stable",
-  "prefer-stable": true
+    "name": "vnuswilliams/laravel-autolang",
+    "description" : "Automatically scan blade files, extract hardcord UI text, wrap laravel trasnlation helpers, and generate JSON and/or PHP trasnlations files",
+    "type": "library",
+    "license": "MIT",
+     "keywords": [
+    "laravel",
+    "trasnlations",
+    "i18n",
+    "autolang",
+    "automate translations"
+],
+    "homepage": "https://github.com/vnuswilliams/laravel-autolang",
+     "require": {
+    "php" : "^8.2",
+        "illuminate/support": "^10.0||^11.0||12.0||^13.11",
+        "illuminate/console": "^10.0||^11.0||12.0||^13.11",
+        "illuminate/filesystem": "^10.0||^11.0||12.0||^13.11"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0||^11.0||12.0||^13.1",
+        "orchestra/testbench": "^10.0||^11.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "VnusWilliams\\LaravelAutoLang\\": "src/"
+        }
+    },
+    "extra" : {
+"laravel" : {
+    "providers" : [
+        "VnusWilliams\\LaravelAutoLang\\LaravelAutoLangServiceProvider"
+    ]
+}
+    },    
+    "autoload-dev": {
+        "psr-4": {
+            "VnusWilliams\\LaravelAutoLang\\Tests\\": "tests"
+        }
+    },
+   "authors": [
+        {
+            "name": "vnus williams",
+            "email": "payongvenus@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "minimum-stability": "stable",
+    "prefer-stable": true
+   
 }

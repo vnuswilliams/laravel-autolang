@@ -1,9 +1,9 @@
 <?php
 
-namespace Vnuswilliams\LaravelAutoLang\Tests\Unit;
+namespace VnusWilliams\LaravelAutoLang\Tests\Unit;
 
-use Vnuswilliams\LaravelAutoLang\Services\TextExtractor;
-use Vnuswilliams\LaravelAutoLang\Tests\TestCase;
+use VnusWilliams\LaravelAutoLang\Services\TextExtractor;
+use VnusWilliams\LaravelAutoLang\Tests\TestCase;
 
 class TextExtractorTest extends TestCase
 {
