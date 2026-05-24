@@ -19,13 +19,15 @@ class TranslationWriter
             return 0;
         }
 
+        $fallbackValues = $this->loadFallbackValues();
+
         return $output === 'php'
-            ? $this->appendPhp($locale, $strings, (string) $phpFile)
-            : $this->appendJson($locale, $strings);
+            ? $this->appendPhp($locale, $strings, (string) $phpFile, $fallbackValues)
+            : $this->appendJson($locale, $strings, $fallbackValues);
     }
 
     /** @param array<int,string> $strings */
-    private function appendJson(string $locale, array $strings): int
+    private function appendJson(string $locale, array $strings, array $fallbackValues): int
     {
         $langPath = lang_path("{$locale}.json");
 
@@ -45,7 +47,7 @@ class TranslationWriter
 
         foreach ($strings as $string) {
             if (! array_key_exists($string, $existing)) {
-                $existing[$string] = $string;
+                $existing[$string] = $fallbackValues[$string] ?? $string;
             }
         }
 
@@ -60,7 +62,7 @@ class TranslationWriter
     }
 
     /** @param array<int,string> $strings */
-    private function appendPhp(string $locale, array $strings, string $fileName): int
+    private function appendPhp(string $locale, array $strings, string $fileName, array $fallbackValues): int
     {
         $langDir = lang_path($locale);
 
@@ -91,7 +93,7 @@ class TranslationWriter
             }
 
             if (! array_key_exists($candidate, $existing)) {
-                $existing[$candidate] = $string;
+                $existing[$candidate] = $fallbackValues[$string] ?? $string;
             }
         }
 
@@ -102,6 +104,19 @@ class TranslationWriter
         $this->files->put($path, $content);
 
         return count($existing) - $beforeCount;
+    }
+
+    /** @return array<string, string> */
+    private function loadFallbackValues(): array
+    {
+        $fallbackPath = lang_path('en.json');
+        if (! $this->files->exists($fallbackPath)) {
+            return [];
+        }
+
+        $decoded = json_decode($this->files->get($fallbackPath), true);
+
+        return is_array($decoded) ? $decoded : [];
     }
 
 

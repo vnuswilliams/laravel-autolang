@@ -60,6 +60,7 @@ class AutoLangCommand extends Command
 
         foreach ($bladeFiles as $file) {
             $original = $files->get($file);
+            $allStrings = [...$allStrings, ...$extractor->extractTranslationKeys($original)];
             $strings = $extractor->extractTranslatableStrings($original);
 
             if ($strings === []) {
@@ -76,13 +77,13 @@ class AutoLangCommand extends Command
             $allStrings = [...$allStrings, ...$strings];
         }
 
-        if ($changes === []) {
-            $this->info('No new translatable strings found.');
+        $allStrings = array_values(array_unique($allStrings));
+
+        if ($changes === [] && $allStrings === []) {
+            $this->info('No translatable strings found.');
 
             return self::SUCCESS;
         }
-
-        $allStrings = array_values(array_unique($allStrings));
 
         $this->info('Detected strings:');
         foreach ($allStrings as $string) {
@@ -107,8 +108,10 @@ class AutoLangCommand extends Command
             return self::SUCCESS;
         }
 
-        foreach ($changes as $change) {
-            $files->put($change['file'], $change['content']);
+        if ($changes !== []) {
+            foreach ($changes as $change) {
+                $files->put($change['file'], $change['content']);
+            }
         }
 
         $phpFile = null;
@@ -127,7 +130,7 @@ class AutoLangCommand extends Command
 
         $this->info('Done.');
         $this->line('Updated Blade files: '.count($changes));
-        $this->line("New translation entries added to {$target}: {$addedCount}");
+        $this->line("Translation entries added to {$target}: {$addedCount}");
 
         return self::SUCCESS;
     }

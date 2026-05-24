@@ -31,6 +31,28 @@ class TextExtractor
     }
 
     /**
+     * Extract existing translation keys already wrapped with __().
+     *
+     * @return array<int, string>
+     */
+    public function extractTranslationKeys(string $content): array
+    {
+        preg_match_all('/__\(\s*([\'"])(.*?)\1\s*\)/u', $content, $matches);
+
+        $keys = [];
+        foreach ($matches[2] ?? [] as $key) {
+            $candidate = trim((string) $key);
+            if ($candidate === '') {
+                continue;
+            }
+
+            $keys[] = preg_replace('/\s+/u', ' ', $candidate) ?? $candidate;
+        }
+
+        return array_values(array_unique($keys));
+    }
+
+    /**
      * Remove blocks that should be ignored during extraction.
      */
     private function maskIgnoredBlocks(string $content): string
