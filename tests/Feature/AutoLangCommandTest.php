@@ -99,4 +99,36 @@ class AutoLangCommandTest extends TestCase
         $this->assertStringContainsString('one.blade.php', $output);
         $this->assertStringContainsString('two.blade.php', $output);
     }
+
+    public function test_rerun_does_not_duplicate_prefixed_php_keys(): void
+    {
+        $viewsPath = resource_path('views');
+        @mkdir($viewsPath, 0777, true);
+        @mkdir(lang_path('fr'), 0777, true);
+
+        $bladeFile = $viewsPath.'/prefixed.blade.php';
+        file_put_contents($bladeFile, '<p>{{ __("messages.lacle") }}</p>');
+
+        $exit = Artisan::call('lang:auto', ['path' => 'prefixed', '--force' => true, '--locale' => 'fr', '--output' => 'php']);
+
+        $this->assertSame(0, $exit);
+        $phpTranslations = include lang_path('fr/messages.php');
+        $this->assertSame(['lacle' => 'lacle'], $phpTranslations);
+    }
+
+    public function test_rerun_does_not_duplicate_prefixed_json_keys(): void
+    {
+        $viewsPath = resource_path('views');
+        @mkdir($viewsPath, 0777, true);
+
+        $bladeFile = $viewsPath.'/prefixed-json.blade.php';
+        file_put_contents($bladeFile, '<p>{{ __("prefix.unautreprefix.lacle") }}</p>');
+
+        $exit = Artisan::call('lang:auto', ['path' => 'prefixed-json', '--force' => true, '--locale' => 'fr', '--output' => 'json']);
+
+        $this->assertSame(0, $exit);
+        $jsonTranslations = json_decode((string) file_get_contents(lang_path('fr.json')), true);
+        $this->assertIsArray($jsonTranslations);
+        $this->assertSame(['lacle' => 'lacle'], $jsonTranslations);
+    }
 }
