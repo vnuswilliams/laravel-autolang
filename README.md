@@ -1,30 +1,23 @@
-````md
 <p align="center">
     <a href="https://packagist.org/packages/vnuswilliams/laravel-autolang">
         <img src="https://img.shields.io/packagist/v/vnuswilliams/laravel-autolang" alt="Latest Version">
     </a>
-
     <a href="https://packagist.org/packages/vnuswilliams/laravel-autolang">
         <img src="https://img.shields.io/packagist/dt/vnuswilliams/laravel-autolang" alt="Total Downloads">
     </a>
-
     <a href="https://packagist.org/packages/vnuswilliams/laravel-autolang">
         <img src="https://img.shields.io/packagist/php-v/vnuswilliams/laravel-autolang" alt="PHP Version">
     </a>
-
-    <a href="https://packagist.org/packages/vnuswilliams/laravel-autolang">
+        <a href="https://packagist.org/packages/vnuswilliams/laravel-autolang">
         <img src="https://img.shields.io/badge/Laravel-10%20--%2013-red" alt="Laravel Version">
     </a>
-
     <a href="LICENSE.md">
         <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
     </a>
-
     <a href="https://github.com/vnuswilliams/laravel-autolang/actions">
-        <img src="https://img.shields.io/github/actions/workflow/status/vnuswilliams/laravel-autolang/tests.yml" alt="Tests">
+        <img src="https://github.com/vnuswilliams/laravel-autolang/workflows/Tests/badge.svg" alt="Tests">
     </a>
-
-    <a href="https://github.com/vnuswilliams/laravel-autolang">
+        <a href="https://github.com/vnuswilliams/laravel-autolang">
         <img src="https://img.shields.io/badge/code%20style-Pint-blue" alt="Code Style">
     </a>
 </p>
@@ -488,5 +481,4 @@ Blade result:
 * HTML attributes (`placeholder`, `title`, etc.) are not handled — consistent with forward behavior.
 * If `lang/<locale>/` contains no `.php` files, the command stops with a warning.
 
-```
 ```
