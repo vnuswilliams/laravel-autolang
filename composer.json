@@ -38,6 +38,11 @@
             "VnusWilliams\\LaravelAutoLang\\Tests\\": "tests"
         }
     },
+    "scripts" : { 
+    	"test" : [
+    		"vendor/bin/phpunit"
+    		]
+    },
    "authors": [
         {
             "name": "vnus williams",
