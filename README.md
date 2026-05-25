@@ -1,49 +1,80 @@
+````md
+<p align="center">
+    <a href="https://packagist.org/packages/vnuswilliams/laravel-autolang">
+        <img src="https://img.shields.io/packagist/v/vnuswilliams/laravel-autolang" alt="Latest Version">
+    </a>
+
+    <a href="https://packagist.org/packages/vnuswilliams/laravel-autolang">
+        <img src="https://img.shields.io/packagist/dt/vnuswilliams/laravel-autolang" alt="Total Downloads">
+    </a>
+
+    <a href="https://packagist.org/packages/vnuswilliams/laravel-autolang">
+        <img src="https://img.shields.io/packagist/php-v/vnuswilliams/laravel-autolang" alt="PHP Version">
+    </a>
+
+    <a href="https://packagist.org/packages/vnuswilliams/laravel-autolang">
+        <img src="https://img.shields.io/badge/Laravel-10%20--%2013-red" alt="Laravel Version">
+    </a>
+
+    <a href="LICENSE.md">
+        <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
+    </a>
+
+    <a href="https://github.com/vnuswilliams/laravel-autolang/actions">
+        <img src="https://img.shields.io/github/actions/workflow/status/vnuswilliams/laravel-autolang/tests.yml" alt="Tests">
+    </a>
+
+    <a href="https://github.com/vnuswilliams/laravel-autolang">
+        <img src="https://img.shields.io/badge/code%20style-Pint-blue" alt="Code Style">
+    </a>
+</p>
+
 # Laravel AutoLang
 
-Laravel AutoLang automatise l'internationalisation de vos vues Blade en :
+Laravel AutoLang automates the internationalization of your Blade views by:
 
-- détectant le texte "en dur" dans vos templates `*.blade.php`,
-- remplaçant ce texte par `{{ __('...') }}`,
-- ajoutant automatiquement les entrées manquantes dans `lang/<locale>.json` ou `lang/<locale>/<fichier>.php`.
+- detecting hardcoded text inside `*.blade.php` templates,
+- replacing this text with `{{ __('...') }}`,
+- automatically adding missing entries into `lang/<locale>.json` or `lang/<locale>/<file>.php`.
 
-L'objectif est de réduire le travail manuel lors de la mise en place (ou la maintenance) du multilingue dans un projet Laravel.
+The goal is to reduce manual work when setting up or maintaining multilingual support in a Laravel project.
 
 ---
 
-## Table des matières
+## Table of Contents
 
-- [Fonctionnalités](#fonctionnalités)
-- [Prérequis](#prérequis)
+- [Features](#features)
+- [Requirements](#requirements)
 - [Installation](#installation)
 - [Configuration](#configuration)
-- [Commande disponible](#commande-disponible)
-- [Exemples d'utilisation](#exemples-dutilisation)
-- [Cas de figure pris en charge](#cas-de-figure-pris-en-charge)
-- [Cas ignorés / limites connues](#cas-ignorés--limites-connues)
-- [Workflow recommandé en équipe](#workflow-recommandé-en-équipe)
-- [Dépannage](#dépannage)
-- [Bonnes pratiques i18n Laravel](#bonnes-pratiques-i18n-laravel)
+- [Available Command](#available-command)
+- [Usage Examples](#usage-examples)
+- [Supported Scenarios](#supported-scenarios)
+- [Ignored Cases / Known Limitations](#ignored-cases--known-limitations)
+- [Recommended Team Workflow](#recommended-team-workflow)
+- [Troubleshooting](#troubleshooting)
+- [Laravel i18n Best Practices](#laravel-i18n-best-practices)
 
 ---
 
-## Fonctionnalités
+## Features
 
-- Scan de un ou plusieurs dossiers de vues Blade.
-- Détection des segments texte entre balises HTML.
-- Remplacement automatique vers `{{ __('Texte') }}`.
-- Génération / mise à jour de traductions au format JSON ou PHP.
-- Nommage automatique du fichier PHP de traduction d'après le fichier Blade scanné.
-- Déduplication des clés déjà existantes.
-- Mode aperçu (`--dry`) pour valider avant écriture.
-- Confirmation interactive (désactivable avec `--force`).
+- Scan one or multiple Blade view directories.
+- Detect text segments between HTML tags.
+- Automatically replace text with `{{ __('Text') }}`.
+- Generate/update translations in JSON or PHP format.
+- Automatically name PHP translation files based on scanned Blade filenames.
+- Deduplicate existing translation keys.
+- Preview mode (`--dry`) before writing changes.
+- Interactive confirmation (disable with `--force`).
 
 ---
 
-## Prérequis
+## Requirements
 
-- PHP compatible avec votre version Laravel.
-- Un projet Laravel avec arborescence standard (`resources/views`, `lang`, etc.).
-- Droits d'écriture sur les fichiers de vues et le dossier de langues.
+- PHP version compatible with your Laravel version.
+- A Laravel project using the standard structure (`resources/views`, `lang`, etc.).
+- Write permissions for view files and language directories.
 
 ---
 
@@ -51,19 +82,19 @@ L'objectif est de réduire le travail manuel lors de la mise en place (ou la mai
 
 ```bash
 composer require --dev vnuswilliams/laravel-autolang
-```
+````
 
 ---
 
 ## Configuration
 
-Publiez le fichier de configuration :
+Publish the configuration file:
 
 ```bash
 php artisan vendor:publish --provider="VnusWilliams\\LaravelAutoLang\\LaravelAutoLangServiceProvider" --tag=config
 ```
 
-Le fichier `config/lang-auto.php` expose :
+The `config/lang-auto.php` file exposes:
 
 ```php
 return [
@@ -82,9 +113,9 @@ return [
 
 ### `paths`
 
-Liste des dossiers à scanner pour trouver les fichiers `*.blade.php`.
+List of directories to scan for `*.blade.php` files.
 
-Exemple avec plusieurs emplacements :
+Example with multiple locations:
 
 ```php
 'paths' => [
@@ -95,9 +126,9 @@ Exemple avec plusieurs emplacements :
 
 ### `extensions`
 
-Liste des extensions de fichiers autorisées pendant le scan.
+List of allowed file extensions during scanning.
 
-Par défaut :
+Default:
 
 ```php
 'extensions' => ['.blade.php'],
@@ -105,7 +136,7 @@ Par défaut :
 
 ### `locale`
 
-Locale cible pour le fichier de traduction.
+Target locale for translation files.
 
 ```php
 'locale' => 'fr',
@@ -113,58 +144,59 @@ Locale cible pour le fichier de traduction.
 
 ### `output`
 
-Format de sortie : `json` (défaut) ou `php`.
+Output format: `json` (default) or `php`.
 
-Lorsque `output = php`, le nom du fichier PHP est **dérivé automatiquement** du fichier Blade scanné — aucune configuration supplémentaire n'est nécessaire.
+When `output = php`, the PHP translation filename is automatically derived from the scanned Blade filename — no extra configuration is required.
 
 ---
 
-## Nommage automatique des fichiers PHP
+## Automatic PHP Translation File Naming
 
-Quand `output = php`, le fichier de traduction prend le nom du fichier Blade, normalisé selon ces règles :
+When `output = php`, the translation file name is generated from the Blade filename according to these rules:
 
-| Fichier Blade | Fichier de traduction |
-|---|---|
-| `welcome.blade.php` | `lang/<locale>/welcome.php` |
+| Blade File                | Translation File                 |
+| ------------------------- | -------------------------------- |
+| `welcome.blade.php`       | `lang/<locale>/welcome.php`      |
 | `leave-balance.blade.php` | `lang/<locale>/leavebalance.php` |
-| `⚡welcome-to.blade.php` | `lang/<locale>/welcometo.php` |
-| `My_Cool View.blade.php` | `lang/<locale>/mycoolview.php` |
+| `⚡welcome-to.blade.php`   | `lang/<locale>/welcometo.php`    |
+| `My_Cool View.blade.php`  | `lang/<locale>/mycoolview.php`   |
 
-**Règles appliquées :**
-1. Les extensions sont supprimées (`.blade.php` → deux passes).
-2. Le résultat est mis en minuscules.
-3. Tout caractère qui n'est pas une lettre Unicode ou un chiffre est retiré.
+**Applied rules:**
 
-Avec `--all`, chaque fichier Blade produit son propre fichier PHP de traduction.
+1. Extensions are removed (`.blade.php` → two passes).
+2. The result is converted to lowercase.
+3. Any non-Unicode letter or digit character is removed.
+
+With `--all`, each Blade file produces its own PHP translation file.
 
 ---
 
-## Commande disponible
+## Available Command
 
 ```bash
 php artisan lang:auto {path?}
 ```
 
-- `path` (optionnel) : chemin **relatif** depuis `resources/views` (ou le dossier racine défini dans la config), sans extension.
-- Si `path` est absent, la commande le demande de façon interactive.
-- Si l'utilisateur saisit un chemin commençant par `/`, le slash initial est retiré automatiquement.
+* `path` (optional): relative path from `resources/views` (or configured root path), without extension.
+* If `path` is missing, the command asks interactively.
+* If the provided path starts with `/`, the leading slash is automatically removed.
 
-Exemples de chemins :
+Example paths:
 
-- `welcome` ⟶ cherche `resources/views/welcome.blade.php`
-- `pages/welcome` ⟶ cherche `resources/views/pages/welcome.blade.php`
+* `welcome` ⟶ searches `resources/views/welcome.blade.php`
+* `pages/welcome` ⟶ searches `resources/views/pages/welcome.blade.php`
 
-Options :
+Options:
 
-- `--all` : scanne **tout** le dossier configuré (et sous-dossiers). Drapeau sans valeur.
-- `--locale=fr` : surcharge ponctuelle de la locale de sortie.
-- `--output=json|php` : choisit le format de sortie (surcharge la config).
-- `--dry` : simule l'exécution sans modifier de fichiers.
-- `--force` : applique directement sans demander de confirmation.
+* `--all` : scan the entire configured directory recursively.
+* `--locale=fr` : temporarily override the output locale.
+* `--output=json|php` : choose output format (overrides config).
+* `--dry` : simulate execution without modifying files.
+* `--force` : apply changes without confirmation.
 
-Avec `--all`, une confirmation supplémentaire est demandée avant de lancer le scan global (sauf si `--force` est présent).
+With `--all`, an extra confirmation is requested before starting the global scan (unless `--force` is present).
 
-Signature complète :
+Full signature:
 
 ```bash
 php artisan lang:auto {path?} {--all} {--locale=} {--output=} {--dry} {--force}
@@ -172,48 +204,49 @@ php artisan lang:auto {path?} {--all} {--locale=} {--output=} {--dry} {--force}
 
 ---
 
-## Exemples d'utilisation
+## Usage Examples
 
-### 1) Première migration vers les traductions (JSON)
+### 1) First Translation Migration (JSON)
 
 ```bash
 php artisan lang:auto --locale=fr
 ```
 
-- Le package détecte les chaînes en dur.
-- Il affiche les chaînes détectées + les fichiers impactés.
-- Après confirmation, il modifie les vues et met à jour `lang/fr.json`.
+* The package detects hardcoded strings.
+* Displays detected strings and impacted files.
+* After confirmation, updates views and `lang/fr.json`.
 
-### 2) Sortie PHP — nommage automatique
+### 2) PHP Output — Automatic Naming
 
 ```bash
 php artisan lang:auto leave-balance --locale=fr --output=php --force
 ```
 
-- Scanne `resources/views/leave-balance.blade.php`.
-- Crée/alimente `lang/fr/leavebalance.php` automatiquement.
+* Scans `resources/views/leave-balance.blade.php`.
+* Automatically creates/updates `lang/fr/leavebalance.php`.
 
-### 3) Scan global en PHP
+### 3) Global PHP Scan
 
 ```bash
 php artisan lang:auto --all --locale=fr --output=php --force
 ```
 
-- Scanne toutes les vues.
-- Chaque vue produit son propre fichier PHP :
-  - `welcome.blade.php` → `lang/fr/welcome.php`
-  - `hr/leave-balance.blade.php` → `lang/fr/leavebalance.php`
+* Scans all views.
+* Each view generates its own PHP translation file:
 
-### 4) Vérification avant commit (CI locale)
+  * `welcome.blade.php` → `lang/fr/welcome.php`
+  * `hr/leave-balance.blade.php` → `lang/fr/leavebalance.php`
+
+### 4) Verification Before Commit (Local CI)
 
 ```bash
 php artisan lang:auto --dry
 ```
 
-- Aucun fichier modifié.
-- Permet de voir ce qui serait changé avant d'appliquer.
+* No files modified.
+* Allows reviewing pending changes before applying them.
 
-### 5) Exécution non interactive (script / CI)
+### 5) Non-Interactive Execution (Scripts / CI)
 
 ```bash
 php artisan lang:auto --force
@@ -221,128 +254,239 @@ php artisan lang:auto --force
 
 ---
 
-## Cas de figure pris en charge
+## Supported Scenarios
 
-### Texte HTML simple
+### Simple HTML Text
 
-Avant :
+Before:
 
 ```blade
-<h1>Bienvenue</h1>
+<h1>Welcome</h1>
 ```
 
-Après :
+After:
 
 ```blade
-<h1>{{ __('Bienvenue') }}</h1>
+<h1>{{ __('Welcome') }}</h1>
 ```
 
-### Espaces autour du texte
+### Preserving Surrounding Spaces
 
-Avant :
+Before:
 
 ```blade
-<p>   Bonjour tout le monde   </p>
+<p>   Hello world   </p>
 ```
 
-Après (espaces structurels conservés) :
+After:
 
 ```blade
-<p>   {{ __('Bonjour tout le monde') }}   </p>
+<p>   {{ __('Hello world') }}   </p>
 ```
 
 ### Apostrophes
 
-Avant :
+Before:
 
 ```blade
-<span>C'est prêt</span>
+<span>It's ready</span>
 ```
 
-Après :
+After:
 
 ```blade
-<span>{{ __('C\'est prêt') }}</span>
+<span>{{ __('It\'s ready') }}</span>
 ```
 
-### Déduplication des entrées JSON
+### JSON Translation Deduplication
 
-Si une clé existe déjà dans `lang/<locale>.json`, elle n'est pas dupliquée.
-Le fichier est trié alphabétiquement pour garder un diff propre.
+If a key already exists in `lang/<locale>.json`, it is not duplicated.
+The file is alphabetically sorted to keep clean diffs.
 
 ---
 
-## Cas ignorés / limites connues
+## Ignored Cases / Known Limitations
 
-Pour éviter les faux positifs, certains blocs sont ignorés pendant l'extraction :
+To avoid false positives, some blocks are ignored during extraction:
 
-- `<script>...</script>`
-- `<style>...</style>`
-- blocs `@php ... @endphp`
-- expressions Blade `{{ ... }}` et `{!! ... !!}`
-- directives Blade (`@if`, `@foreach`, etc.)
-- composants Blade `<x-... />` et `<x-...>...</x-...>`
+* `<script>...</script>`
+* `<style>...</style>`
+* `@php ... @endphp` blocks
+* Blade expressions `{{ ... }}` and `{!! ... !!}`
+* Blade directives (`@if`, `@foreach`, etc.)
+* Blade components `<x-... />` and `<x-...>...</x-...>`
 
-### Limites importantes à connaître
+### Important Limitations
 
-- Le package cible le **texte entre balises** (`>texte<`).
-  - Les attributs HTML ne sont pas convertis automatiquement (`placeholder`, `title`, etc.).
-- Le package ne "traduit" pas le contenu :
-  - il crée des entrées clé=valeur (ex: `"Hello": "Hello"`) dans le JSON.
-- Si vous avez du Blade très dynamique / atypique, relisez les changements avant commit.
+* The package targets text between tags (`>text<`).
+
+  * HTML attributes are not automatically translated (`placeholder`, `title`, etc.).
+* The package does not translate content:
+
+  * it creates key=value entries (example: `"Hello": "Hello"`).
+* For highly dynamic or unusual Blade structures, always review changes before committing.
 
 ---
 
-## Workflow recommandé en équipe
+## Recommended Team Workflow
 
-1. Créer une branche dédiée.
-2. Lancer un dry-run :
+1. Create a dedicated branch.
+
+2. Run a dry-run:
 
    ```bash
    php artisan lang:auto --dry
    ```
 
-3. Exécuter réellement :
+3. Execute for real:
 
    ```bash
    php artisan lang:auto --force
    ```
 
-4. Relire les diffs sur :
-   - vues Blade modifiées,
-   - fichiers `lang/<locale>/*.php` ou `lang/<locale>.json`.
-5. Faire un commit clair (ex: `chore(i18n): auto-wrap blade strings`).
+4. Review diffs for:
+
+   * modified Blade views,
+   * `lang/<locale>/*.php` or `lang/<locale>.json` files.
+
+5. Commit clearly (example: `chore(i18n): auto-wrap blade strings`).
 
 ---
 
-## Dépannage
+## Troubleshooting
 
 ### "No Blade files found."
 
-- Vérifiez les chemins dans `config/lang-auto.php` (`paths`).
-- Vérifiez que les dossiers existent et contiennent des fichiers `*.blade.php`.
+* Check paths in `config/lang-auto.php` (`paths`).
+* Ensure directories exist and contain `*.blade.php` files.
 
 ### "No new translatable strings found."
 
-- Les chaînes sont peut-être déjà traduites.
-- Le contenu peut être dans un bloc ignoré (`script`, `style`, composants, Blade dynamique).
+* Strings may already be translated.
+* Content may be inside ignored blocks (`script`, `style`, components, dynamic Blade).
 
-### Le fichier de traduction PHP n'est pas créé
+### PHP translation file is not created
 
-- Vérifiez les permissions d'écriture dans le dossier `lang/`.
-- Vérifiez la locale utilisée (`--locale` ou config).
-
----
-
-## Bonnes pratiques i18n Laravel
-
-- Utiliser des phrases stables et cohérentes.
-- Éviter les concaténations de chaînes dans les vues.
-- Préférer les paramètres Laravel (`__('Welcome :name', ['name' => $name])`) pour le dynamique.
-- Mettre en place une revue des traductions côté QA / produit.
+* Check write permissions for the `lang/` directory.
+* Verify the selected locale (`--locale` or config).
 
 ---
 
-## Licence
+## Laravel i18n Best Practices
+
+* Use stable and consistent phrases.
+* Avoid string concatenation inside views.
+* Prefer Laravel placeholders (`__('Welcome :name', ['name' => $name])`) for dynamic content.
+* Add QA/product review for translations.
+
+---
+
+## License
 
 MIT
+
+---
+
+## Reverse Command — `--reverse`
+
+The `--reverse` command allows reverting changes: it reads translation values, replaces `{{ __('...') }}` helpers with raw text in Blade views, then removes used keys from translation files.
+
+```bash
+php artisan lang:auto {path?} --reverse
+php artisan lang:auto --all --reverse
+```
+
+The flag does not take any value. Everything relies on the configuration (`locale`, `output`).
+
+---
+
+### Workflow Depending on `output`
+
+**`json` mode**
+
+1. Load `lang/<locale>.json`
+2. In targeted Blade files, resolve each `{{ __("...") }}` → replace with raw value
+3. Remove used keys from the `.json` file and rewrite it
+
+**`php` mode**
+
+1. List available `.php` files in `lang/<locale>/` and ask for selection interactively
+2. Load translations from the selected file
+3. In targeted Blade files, resolve each `{{ __("...") }}` → replace with raw value
+4. Remove used keys from the `.php` file and rewrite it
+
+---
+
+### Key Resolution
+
+The last segment after the final `.` is used as the lookup key inside translation files.
+
+| Blade Helper                   | Resolved Key |
+| ------------------------------ | ------------ |
+| `{{ __("welcome") }}`          | `welcome`    |
+| `{{ __("messages.welcome") }}` | `welcome`    |
+| `{{ __("a.b.c.myKey") }}`      | `myKey`      |
+
+If a key is not found in the translation file, the helper remains unchanged.
+
+---
+
+### Full Example
+
+Blade before:
+
+```blade
+<h1>{{ __("welcome") }}</h1>
+<p>{{ __("messages.farewell") }}</p>
+```
+
+`lang/fr.json`:
+
+```json
+{
+    "farewell": "Goodbye",
+    "welcome": "Welcome"
+}
+```
+
+After:
+
+```bash
+php artisan lang:auto welcome --reverse --locale=fr
+```
+
+Blade result:
+
+```blade
+<h1>Welcome</h1>
+<p>Goodbye</p>
+```
+
+`lang/fr.json` after cleanup:
+
+```json
+{}
+```
+
+---
+
+### Compatible Options With `--reverse`
+
+| Option               | Behavior                           |
+| -------------------- | ---------------------------------- |
+| `--dry`              | Preview without modifying files    |
+| `--force`            | Apply without confirmation         |
+| `--all`              | Process all configured views       |
+| `--locale=fr`        | Temporarily override locale        |
+| `--output=json\|php` | Temporarily override output format |
+
+---
+
+### Limitations
+
+* Only keys present in the selected translation file are resolved.
+* HTML attributes (`placeholder`, `title`, etc.) are not handled — consistent with forward behavior.
+* If `lang/<locale>/` contains no `.php` files, the command stops with a warning.
+
+```
+```
