@@ -12,7 +12,7 @@
 ],
     "homepage": "https://github.com/vnuswilliams/laravel-autolang",
      "require": {
-    "php" : "^8.2",
+    "php" : "^8.2||^8.3||^8.4",
         "illuminate/support": "^10.0 || ^11.0 || ^12.0 || ^13.0",
         "illuminate/console": "^10.0 || ^11.0 || ^12.0 || ^13.0",
         "illuminate/filesystem": "^10.0 || ^11.0 || ^12.0 || ^13.0"
